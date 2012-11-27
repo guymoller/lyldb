@@ -1,0 +1,16 @@
+<html>
+<head></head>
+<body>
+<h1>welcome</h1>
+{{ msg }}
+{% if orders %}
+    <ul>
+    {% for order in orders %}
+        <li><a href="/order/{{ poll.increment_id }}/">{{ order.increment_id }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No Orders.</p>
+{% endif %}
+</body>
+</html>
