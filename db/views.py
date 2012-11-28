@@ -3,44 +3,52 @@ from django.http import HttpResponse
 from django.template.context import Context
 from django.template import loader
 from models import SalesFlatOrder
-import cgi
-import datetime
+from datetime import date, timedelta,datetime
 import time
-import sys
+from itertools import groupby
+from django.utils.datetime_safe import strftime
 
 def index(request):
+    """
+    start, end expect the format yyyy-mm-dd
+    """
     msg = "yep"
     t = loader.get_template('db/index.html')
-    
-    param_date = 'today'
-    params = cgi.FieldStorage()
-    if "date" in params:
-        param_date = params['date'].value
-    today=datetime.date.today()
-    yesterday = datetime.date.today() + datetime.timedelta(days=-1)
-    date = today
-    if param_date == 'yesterday':
-        date = yesterday
-    elif param_date == 'today':
-        date = today
+    if request.GET.get('start'): 
+        start_date = convert_to_date(request.GET.get('start'))
     else:
-        try:
-            date = datetime.datetime(*time.strptime(param_date, "%d-%m-%Y")[:6])
-        except:
-            msg =  "error, could not parse '" +  param_date +  "'" + str(sys.exc_info()[0])
-            date = today
+        start_date = datetime.now() + timedelta(days=-30) #30 days 
+    if request.GET.get('end'):
+        end_date=convert_to_date(request.GET.get('end'))
+    else:
+        end_date = datetime.now()
+    orders = SalesFlatOrder.objects.filter(created_at__gte = start_date).filter(created_at__lte = end_date).order_by('created_at')
+    orders_by_date = []
     
-    orders = SalesFlatOrder.objects.filter(created_at=date)
-    prev_day = date + datetime.timedelta(days=-1)
-    next_day = date + datetime.timedelta(days=1)
-    pagination_links = {"prev": prev_day.strftime("%d-%m-%Y"),  "next": next_day.strftime("%d-%m-%Y"),}
+    for day, order_group in groupby(orders,lambda o: strftime(o.created_at, "%d-%m-%Y")):
+        orders_by_date.append ({'day':day, 'display_date': day.replace('-','.')[:-5],  'orders': list(order_group)})
+        
+    for row in orders_by_date:
+        
+        row['revenues']= sum([x.grand_total for x  in row['orders']])
+        row['count'] = len(row['orders'])
+    
+    orders_by_date_reverse = orders_by_date[:]
+    orders_by_date_reverse.reverse()
     c = Context({
-        'orders': orders,         
-        'pagination_links': pagination_links,
+        'orders': orders,
+        'orders_by_date':orders_by_date,  
+        'orders_by_date_reverse':orders_by_date_reverse,            
         'msg': msg,
+        'start_date':start_date,
+        'end_date':end_date
+        
     })
     
     
     
     return HttpResponse(t.render(c))
+
+def convert_to_date(param_date):
+    return datetime(*time.strptime(param_date, "%Y-%m-%d")[:6])
     

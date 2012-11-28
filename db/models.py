@@ -1,4 +1,6 @@
 from django.db import models
+from datetime import date
+from django.utils.datetime_safe import strftime
 
 class SalesFlatOrder(models.Model):
     entity_id = models.IntegerField(primary_key=True)
@@ -64,6 +66,8 @@ class SalesFlatOrder(models.Model):
     total_item_count = models.IntegerField()
     customer_gender = models.IntegerField(null=True, blank=True)
     base_shipping_incl_tax = models.DecimalField(null=True, max_digits=14, decimal_places=4, blank=True)
+    
+   
     class Meta:
         db_table = u'sales_flat_order'
 

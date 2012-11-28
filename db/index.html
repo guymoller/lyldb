@@ -1,14 +1,62 @@
 <html>
-<head></head>
+<head>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    
+</head>
 <body>
-<h1>welcome</h1>
-{{ msg }}
-{% if orders %}
-    <ul>
-    {% for order in orders %}
-        <li><a href="/order/{{ poll.increment_id }}/">{{ order.increment_id }}</a></li>
+<h1>orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}</h1>
+
+{% if orders_by_date %}
+<script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawCharts);
+      function drawCharts() {
+        var order_count_data = google.visualization.arrayToDataTable([
+          ['Date', 'Orders'],
+          {% for row in orders_by_date %}
+           ['{{row.display_date}}', {{row.count}}],
+         {% endfor %} 
+        ]);
+        var order_revenue_data = google.visualization.arrayToDataTable([
+          ['Date', 'Orders'],
+          {% for row in orders_by_date %}
+           ['{{row.display_date}}', {{row.revenues}}],
+         {% endfor %} 
+        ]);
+        
+
+        var options_count = {
+          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}',
+        };
+        var options_revenue = {
+          title: 'sales volume {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}',
+        };
+
+        var order_count_chart = new google.visualization.AreaChart(document.getElementById('order_count_chart'));
+        var order_revenue_chart = new google.visualization.AreaChart(document.getElementById('order_revenue_chart'));
+        order_count_chart.draw(order_count_data, options_count);
+        order_revenue_chart.draw(order_revenue_data, options_revenue);
+      }
+    </script>  
+
+<div id="order_count_chart"></div>
+<div id="order_revenue_chart"></div>
+    <ul class="results">
+    {% for row in orders_by_date_reverse %}
+       <li>
+       <span class="day">{{row.day}}</span>
+       <span class="revenues">{{row.revenues|floatformat:"0"}}&euro;</span>
+       <span class="count">({{row.count}})</span>
+       
+       <ul>
+        {% for order in row.orders %}
+        <li><a href="/order/{{ order.increment_id }}/">{{ order.increment_id }}</a>&nbsp {{order.grand_total|floatformat:"2"}}&euro;,&nbsp;({{order.created_at|time}}) </li>
+        {% endfor %}
+       </ul>
+       </li> 
     {% endfor %}
     </ul>
+    
 {% else %}
     <p>No Orders.</p>
 {% endif %}
