@@ -3,6 +3,7 @@
  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet"/>
+<link href="/static/base.css" rel="stylesheet"/>
 <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -12,31 +13,24 @@
 
 </head>
 <body>
+
 <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="#">Project name</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
+    <div class="navbar-inner">
+      <div class="container">
+          <a class="brand" href="/">LOUyLOU:&nbsp{{today_orders.count}} ({{today_orders.sum|floatformat:"0"}}&euro;)</a>
+          <ul class="nav">
+            {% for l in date_range_links %}
+            <li><a href="?start={{l.range.start}}&end={{l.range.end}}">{{l.label}}</a></li>
+            {% endfor %}
+          </ul>
       </div>
     </div>
+</div>
+<div class="container">
 
-    <div class="container">
-
-
+<!--
 <h1>orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}</h1>
-
+-->
 {% if orders_by_date %}
 <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
@@ -57,10 +51,10 @@
         
 
         var options_count = {
-          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}',
+          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}', legend:'none'
         };
         var options_revenue = {
-          title: 'sales volume {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}',
+          title: 'sales volume {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}',legend:'none'
         };
 
         var order_count_chart = new google.visualization.AreaChart(document.getElementById('order_count_chart'));
@@ -72,14 +66,15 @@
 
 <div id="order_count_chart"></div>
 <div id="order_revenue_chart"></div>
-    <ul class="results">
+    <ul class="results unstyled">
     {% for row in orders_by_date_reverse %}
        <li>
        <span class="day">{{row.day}}</span>
-       <span class="revenues">{{row.revenues|floatformat:"0"}}&euro;</span>
-       <span class="count">({{row.count}})</span>
+       <span class="count">{{row.count}}</span>
+       <span class="revenues">({{row.revenues|floatformat:"0"}}&euro;)</span>
        
-       <ul>
+       
+       <ul class="unstyled">
         {% for order in row.orders %}
         <li><a href="/order/{{ order.increment_id }}/">{{ order.increment_id }}</a>&nbsp {{order.grand_total|floatformat:"2"}}&euro;,&nbsp;({{order.created_at|time}}) </li>
         {% endfor %}

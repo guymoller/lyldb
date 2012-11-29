@@ -7,22 +7,25 @@ from datetime import date, timedelta,datetime
 import time
 from itertools import groupby
 from django.utils.datetime_safe import strftime
+from django.db.models import Sum
 
 def index(request):
     """
     start, end expect the format yyyy-mm-dd
     """
-    msg = "yep"
+    today = datetime.now()  
     t = loader.get_template('db/index.html')
     if request.GET.get('start'): 
         start_date = convert_to_date(request.GET.get('start'))
     else:
-        start_date = datetime.now() + timedelta(days=-30) #30 days 
+        start_date = today + timedelta(days=-30) #30 days 
     if request.GET.get('end'):
         end_date=convert_to_date(request.GET.get('end'))
     else:
-        end_date = datetime.now()
+        end_date = today
     orders = SalesFlatOrder.objects.filter(created_at__gte = start_date).filter(created_at__lte = end_date).order_by('created_at')
+    today_orders = SalesFlatOrder.objects.filter(created_at__gte = datetime(today.year, today.month, today.day))
+    today_revenues = today_orders.aggregate(Sum('grand_total'))['grand_total__sum']
     orders_by_date = []
     
     for day, order_group in groupby(orders,lambda o: strftime(o.created_at, "%d-%m-%Y")):
@@ -39,9 +42,10 @@ def index(request):
         'orders': orders,
         'orders_by_date':orders_by_date,  
         'orders_by_date_reverse':orders_by_date_reverse,            
-        'msg': msg,
         'start_date':start_date,
-        'end_date':end_date
+        'end_date':end_date,
+        'date_range_links':date_range_links(),
+        'today_orders':{'count':len(today_orders),'sum':today_revenues}
         
     })
     
@@ -51,4 +55,48 @@ def index(request):
 
 def convert_to_date(param_date):
     return datetime(*time.strptime(param_date, "%Y-%m-%d")[:6])
+
+def convert_to_string(p_date):
+    return strftime(p_date, "%Y-%m-%d")
     
+def date_range_links():
+    """
+    generates date ranges for the query
+     [{'label': '7d',  'range':{'start':'2011-11-01','end':'2011-11-07'}},
+      {'label': '30d', 'range':{'start':'2011-11-01','end':'2011-11-30'}}] end is always today
+    """
+    # first calculate timedeltas for YTD, MTD
+    res = []
+    today = datetime.now()
+    res.append({
+        'label':'7d', 
+        'range':{
+                'start':convert_to_string(today+timedelta(days=-7)),
+                'end':convert_to_string(today)
+                }})
+    res.append({
+        'label':'30d', 
+        'range':{
+                'start':convert_to_string(today+timedelta(days=-30)),
+                'end':convert_to_string(today)
+                }})
+    res.append({
+        'label':'MTD', 
+        'range':{
+                'start':convert_to_string(datetime(today.year,today.month,1)),
+                'end':convert_to_string(today)
+                }})
+    res.append({
+        'label':'YTD', 
+        'range':{
+                'start':convert_to_string(datetime(today.year,1,11)),
+                'end':convert_to_string(today)
+                }})
+    return res
+    
+    
+
+
+
+
+
