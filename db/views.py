@@ -11,7 +11,7 @@ from django.db.models import Sum
 
 def index(request):
     """
-    start, end expect the format yyyy-mm-dd
+    parameteres: start, end expect the format yyyy-mm-dd, range_label - 30d, 7d, MTD etc
     """
     today = datetime.now()  
     t = loader.get_template('db/index.html')
@@ -44,7 +44,7 @@ def index(request):
         'orders_by_date_reverse':orders_by_date_reverse,            
         'start_date':start_date,
         'end_date':end_date,
-        'date_range_links':date_range_links(),
+        'date_range_links':date_range_links(request.GET.get('range_label')),
         'today_orders':{'count':len(today_orders),'sum':today_revenues}
         
     })
@@ -59,12 +59,13 @@ def convert_to_date(param_date):
 def convert_to_string(p_date):
     return strftime(p_date, "%Y-%m-%d")
     
-def date_range_links():
+def date_range_links(p_label = '30d'):
     """
     generates date ranges for the query
      [{'label': '7d',  'range':{'start':'2011-11-01','end':'2011-11-07'}},
       {'label': '30d', 'range':{'start':'2011-11-01','end':'2011-11-30'}}] end is always today
     """
+    if p_label is None: p_label = '30d'
     # first calculate timedeltas for YTD, MTD
     res = []
     today = datetime.now()
@@ -92,6 +93,12 @@ def date_range_links():
                 'start':convert_to_string(datetime(today.year,1,11)),
                 'end':convert_to_string(today)
                 }})
+    for l in res:
+        if l['label'] == p_label:
+            l['active'] = True
+        else:
+            l['active'] = False
+
     return res
     
     
