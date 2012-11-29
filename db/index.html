@@ -17,7 +17,7 @@
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
-          <a class="brand" href="/">LOUyLOU:&nbsp{{today_orders.count}} ({{today_orders.sum|floatformat:"0"}}&euro;)</a>
+          <a class="brand" href="/">{{today_orders.count}} ({{today_orders.sum|floatformat:"0"}}&euro;)</a>
           <ul class="nav">
             {% for l in date_range_links %}
             <li><a href="?start={{l.range.start}}&end={{l.range.end}}">{{l.label}}</a></li>
@@ -76,7 +76,7 @@
        
        <ul class="unstyled">
         {% for order in row.orders %}
-        <li><a href="/order/{{ order.increment_id }}/">{{ order.increment_id }}</a>&nbsp {{order.grand_total|floatformat:"2"}}&euro;,&nbsp;({{order.created_at|time}}) </li>
+        <li>{{ order.increment_id }}&nbsp {{order.grand_total|floatformat:"2"}}&euro;,&nbsp;({{order.created_at|time:"H:i"}}) </li>
         {% endfor %}
        </ul>
        </li> 
