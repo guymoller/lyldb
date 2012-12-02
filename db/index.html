@@ -1,6 +1,6 @@
 <html lang="en">
 <head>
- <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet"/>
 <link href="/static/base.css" rel="stylesheet"/>
@@ -51,10 +51,10 @@
         
 
         var options_count = {
-          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}', legend:'none'
+          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}} ({{order_stats.count}})', legend:'none'
         };
         var options_revenue = {
-          title: 'sales volume {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}',legend:'none'
+          title: 'sales volume {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}  ({{order_stats.sum|floatformat:"2"}})',legend:'none'
         };
 
         var order_count_chart = new google.visualization.AreaChart(document.getElementById('order_count_chart'));

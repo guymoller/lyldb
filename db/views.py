@@ -24,6 +24,7 @@ def index(request):
     else:
         end_date = today
     orders = SalesFlatOrder.objects.filter(created_at__gte = start_date).filter(created_at__lte = end_date).order_by('created_at')
+    order_stats = {'count':len(orders), 'sum': orders.aggregate(Sum('grand_total'))['grand_total__sum']}
     today_orders = SalesFlatOrder.objects.filter(created_at__gte = datetime(today.year, today.month, today.day))
     today_revenues = today_orders.aggregate(Sum('grand_total'))['grand_total__sum']
     orders_by_date = []
@@ -40,6 +41,7 @@ def index(request):
     orders_by_date_reverse.reverse()
     c = Context({
         'orders': orders,
+        'order_stats':order_stats,
         'orders_by_date':orders_by_date,  
         'orders_by_date_reverse':orders_by_date_reverse,            
         'start_date':start_date,
