@@ -21,6 +21,7 @@
             {% for l in date_range_links %}
             <li class="{% if l.active %}active{% endif %}"><a href="?start={{l.range.start}}&end={{l.range.end}}&range_label={{l.label}}&res={{ res }}">{{l.label}}</a></li>
             {% endfor %}
+            <li class="divider-vertical"></li>          
             {% for resolution in resolutions %}
             <li class="{% if resolution == res %}active{% endif %}" ><a href="?start={{ start_date|date:"Y-m-d" }}&end={{ end_date|date:"Y-m-d" }}&res={{ resolution }}&range_label={{ range_label }}">{{ resolution }}</a></li>
             {% endfor %}
