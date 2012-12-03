@@ -13,6 +13,13 @@ def index(request):
     """
     parameteres: start, end expect the format yyyy-mm-dd, range_label - 30d, 7d, MTD etc
     """
+    res = request.GET.get('res')
+    if res is None: res = "day"
+    def date_format(res):
+        config = {"day":"%d-%m-%Y", "week":"%W","month":"%m-%Y" }
+        return config.get(res)
+
+
     today = datetime.now()  
     t = loader.get_template('db/index.html')
     if request.GET.get('start'): 
@@ -29,7 +36,7 @@ def index(request):
     today_revenues = today_orders.aggregate(Sum('grand_total'))['grand_total__sum']
     orders_by_date = []
     
-    for day, order_group in groupby(orders,lambda o: strftime(o.created_at, "%d-%m-%Y")):
+    for day, order_group in groupby(orders,lambda o: strftime(o.created_at, date_format(res))):
         orders_by_date.append ({'day':day, 'display_date': day.replace('-','.')[:-5],  'orders': list(order_group)})
         
     for row in orders_by_date:
@@ -47,6 +54,9 @@ def index(request):
         'start_date':start_date,
         'end_date':end_date,
         'date_range_links':date_range_links(request.GET.get('range_label')),
+        'res':res,
+        'resolutions':['day','week','month'],
+        'range_label':request.GET.get('range_label'),
         'today_orders':{'count':len(today_orders),'sum':today_revenues}
         
     })
