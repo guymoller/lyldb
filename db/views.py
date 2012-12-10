@@ -37,7 +37,6 @@ def index(request):
     else:
         end_date = today
 
-    generate_data_points_for_orders_per_date(res,start_date, end_date)    
     orders = SalesFlatOrder.objects.filter(created_at__gte = start_date).filter(created_at__lte = end_date).order_by('created_at')
     order_stats = {'count':len(orders), 'sum': orders.aggregate(Sum('grand_total'))['grand_total__sum']}
     today_orders = SalesFlatOrder.objects.filter(created_at__gte = datetime(today.year, today.month, today.day))
