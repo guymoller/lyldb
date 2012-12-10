@@ -75,7 +75,9 @@
        
        <ul class="unstyled">
         {% for order in row.orders %}
-        <li><a href="{% url list_order_items order.entity_id %}">{{ order.increment_id }}</a>&nbsp {{order.grand_total|floatformat:"2"}}&euro;,&nbsp;({{order.created_at|time:"H:i"}}) </li>
+        <li><a href="{% url list_order_items order.entity_id %}">{{ order.increment_id }}</a>&nbsp {{order.grand_total|floatformat:"2"}}&euro;,&nbsp;({{order.created_at|time:"H:i"}}) [{% for item in order.salesflatorderitem_set.all  %}
+          {{ item.name }},
+        {% endfor %}]</li>
         {% endfor %}
        </ul>
        </li> 
