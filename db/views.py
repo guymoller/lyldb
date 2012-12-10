@@ -11,7 +11,6 @@ from itertools import groupby
 from django.utils.datetime_safe import strftime
 from django.db.models import Sum
 from datetime import date
-from dateutil.rrule import rrule, DAILY, WEEKLY, MONTHLY
 
 
 
@@ -81,12 +80,6 @@ def convert_to_date(param_date):
 def convert_to_string(p_date):
     return strftime(p_date, "%Y-%m-%d")
     
-def generate_data_points_for_orders_per_date(res,start_date, end_date):
-    result = []
-    freq = {"day":DAILY, "week": WEEKLY, "month":MONTHLY}.get(res)
-    for dt in rrule(freq, dtstart=start_date, until=end_date):
-        result.append({'day':dt.strftime(date_format(res)), }) 
-
 
 
 def date_format(res):
