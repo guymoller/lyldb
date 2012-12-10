@@ -1,13 +1,24 @@
 # Create your views here.
 from django.http import HttpResponse
+from django.shortcuts import render_to_response
+
 from django.template.context import Context
 from django.template import loader
-from models import SalesFlatOrder
+from models import SalesFlatOrder, SalesFlatOrderItem
 from datetime import date, timedelta,datetime
 import time
 from itertools import groupby
 from django.utils.datetime_safe import strftime
 from django.db.models import Sum
+from datetime import date
+from dateutil.rrule import rrule, DAILY, WEEKLY, MONTHLY
+
+
+
+def order_items(request,order_id):
+    items = SalesFlatOrderItem.objects.filter(order__pk = order_id)
+    return render_to_response('db/order_items.html',{'items':items})
+
 
 def index(request):
     """
@@ -15,11 +26,7 @@ def index(request):
     """
     res = request.GET.get('res')
     if res is None: res = "day"
-    def date_format(res):
-        config = {"day":"%d-%m-%Y", "week":"%W","month":"%m-%Y" }
-        return config.get(res)
-
-
+    
     today = datetime.now()  
     t = loader.get_template('db/index.html')
     if request.GET.get('start'): 
@@ -30,6 +37,8 @@ def index(request):
         end_date=convert_to_date(request.GET.get('end'))
     else:
         end_date = today
+
+    generate_data_points_for_orders_per_date(res,start_date, end_date)    
     orders = SalesFlatOrder.objects.filter(created_at__gte = start_date).filter(created_at__lte = end_date).order_by('created_at')
     order_stats = {'count':len(orders), 'sum': orders.aggregate(Sum('grand_total'))['grand_total__sum']}
     today_orders = SalesFlatOrder.objects.filter(created_at__gte = datetime(today.year, today.month, today.day))
@@ -44,6 +53,7 @@ def index(request):
         row['revenues']= sum([x.grand_total for x  in row['orders']])
         row['count'] = len(row['orders'])
     
+    #TODO insert to the list all the dates in which there were no orders
     orders_by_date_reverse = orders_by_date[:]
     orders_by_date_reverse.reverse()
     c = Context({
@@ -71,6 +81,20 @@ def convert_to_date(param_date):
 def convert_to_string(p_date):
     return strftime(p_date, "%Y-%m-%d")
     
+def generate_data_points_for_orders_per_date(res,start_date, end_date):
+    result = []
+    freq = {"day":DAILY, "week": WEEKLY, "month":MONTHLY}.get(res)
+    for dt in rrule(freq, dtstart=start_date, until=end_date):
+        result.append({'day':dt.strftime(date_format(res)), }) 
+
+
+
+def date_format(res):
+    config = {"day":"%d-%m-%Y", "week":"%W","month":"%m-%Y" }
+    return config.get(res)
+
+
+
 def date_range_links(p_label = '30d'):
     """
     generates date ranges for the query

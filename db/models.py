@@ -2,6 +2,8 @@ from django.db import models
 from datetime import date
 from django.utils.datetime_safe import strftime
 
+
+
 class SalesFlatOrder(models.Model):
     entity_id = models.IntegerField(primary_key=True)
     state = models.CharField(max_length=96, blank=True)
@@ -70,5 +72,24 @@ class SalesFlatOrder(models.Model):
    
     class Meta:
         db_table = u'sales_flat_order'
+
+
+class SalesFlatOrderItem(models.Model):
+    item_id = models.IntegerField(primary_key=True)
+    order = models.ForeignKey(SalesFlatOrder)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+    product_id = models.IntegerField(null=True, blank=True)
+    sku = models.CharField(max_length=765, blank=True)
+    name = models.CharField(max_length=765, blank=True)
+    description = models.TextField(blank=True)
+    qty_shipped = models.DecimalField(null=True, max_digits=14, decimal_places=4, blank=True)
+    base_cost = models.DecimalField(null=True, max_digits=14, decimal_places=4, blank=True)
+    price = models.DecimalField(max_digits=14, decimal_places=4)
+    base_price = models.DecimalField(max_digits=14, decimal_places=4)
+    class Meta:
+        db_table = u'sales_flat_order_item'
+
+
 
 

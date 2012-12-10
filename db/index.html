@@ -50,10 +50,10 @@
         
 
         var options_count = {
-          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}} ({{order_stats.count}})', legend:'none'
+          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}} ({{order_stats.count}})', legend:'none', vAxis:{minValue:0}
         };
         var options_revenue = {
-          title: 'sales volume {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}  ({{order_stats.sum|floatformat:"2"}})',legend:'none'
+          title: 'sales volume {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}  ({{order_stats.sum|floatformat:"2"}})',legend:'none',vAxis:{minValue:0}
         };
 
         var order_count_chart = new google.visualization.AreaChart(document.getElementById('order_count_chart'));
@@ -75,7 +75,7 @@
        
        <ul class="unstyled">
         {% for order in row.orders %}
-        <li>{{ order.increment_id }}&nbsp {{order.grand_total|floatformat:"2"}}&euro;,&nbsp;({{order.created_at|time:"H:i"}}) </li>
+        <li><a href="{% url list_order_items order.entity_id %}">{{ order.increment_id }}</a>&nbsp {{order.grand_total|floatformat:"2"}}&euro;,&nbsp;({{order.created_at|time:"H:i"}}) </li>
         {% endfor %}
        </ul>
        </li> 
