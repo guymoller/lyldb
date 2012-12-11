@@ -32,39 +32,35 @@
 </div>
 {% if orders_by_date %}
 <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
+      google.load("visualization", "1", {packages:["corechart","table"]});
       google.setOnLoadCallback(drawCharts);
       function drawCharts() {
-        var order_count_data = google.visualization.arrayToDataTable([
-          ['Date', 'Orders'],
+        var data = google.visualization.arrayToDataTable([
+          ['Date', 'Orders' , 'Sales'],
           {% for row in orders_by_date %}
-           ['{{row.display_date}}', {{row.count}}],
+           ['{{row.display_date}}', {{ row.count }},{{row.revenues|floatformat:"2"}}],
          {% endfor %} 
         ]);
-        var order_revenue_data = google.visualization.arrayToDataTable([
-          ['Date', 'Orders'],
-          {% for row in orders_by_date %}
-           ['{{row.display_date}}', {{row.revenues}}],
-         {% endfor %} 
-        ]);
+        var options = {
+          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}} ({{order_stats.count}} / {{order_stats.revenues|floatformat:"0"}} \u20ac)',
+          vAxes: {0: {format: '#', minValue: 0},1: {format: '#,### \u20ac', minValue: 0}}, 
+          hAxis: {title: "Month"},
+          series: {
+                   0:{ type: "bars", targetAxisIndex: 0 },
+                   1: { type: "line", targetAxisIndex: 1,minValue: 0}
+              }
+          };
         
-
-        var options_count = {
-          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}} ({{order_stats.count}})', legend:'none', vAxis:{minValue:0}
-        };
-        var options_revenue = {
-          title: 'sales volume {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}}  ({{order_stats.sum|floatformat:"2"}})',legend:'none',vAxis:{minValue:0}
-        };
-
-        var order_count_chart = new google.visualization.AreaChart(document.getElementById('order_count_chart'));
-        var order_revenue_chart = new google.visualization.AreaChart(document.getElementById('order_revenue_chart'));
-        order_count_chart.draw(order_count_data, options_count);
-        order_revenue_chart.draw(order_revenue_data, options_revenue);
+        
+        var order_chart = new google.visualization.AreaChart(document.getElementById('order_chart'));
+        var order_table_chart = new google.visualization.Table(document.getElementById('order_table'));
+        order_chart.draw(data, options);
+        order_table_chart.draw(data, null);
       }
     </script>  
 
-<div id="order_count_chart"></div>
-<div id="order_revenue_chart"></div>
+<div id="order_chart"></div>
+<div id="order_table"></div>
     <ul class="results unstyled">
     {% for row in orders_by_date_reverse %}
        <li>
