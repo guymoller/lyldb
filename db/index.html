@@ -42,7 +42,7 @@
          {% endfor %} 
         ]);
         var options = {
-          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}} ({{order_stats.count}} / {{order_stats.revenues|floatformat:"0"}} \u20ac)',
+          title: 'orders {{start_date|date:"d.m"}} to {{end_date|date:"d.m"}} ({{order_stats.count}} / {{order_stats.sum|floatformat:"0"}} \u20ac)',
           vAxes: {0: {format: '#', minValue: 0},1: {format: '#,### \u20ac', minValue: 0}}, 
           hAxis: {title: "Month"},
           series: {
